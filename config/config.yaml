@@ -1,0 +1,50 @@
+camera:
+  device: 0
+  width: 1280
+  height: 720
+  fps: 15
+
+detection:
+  enabled: true
+  # 背景学習率
+  alpha: 0.01
+  # 二値化閾値
+  threshold: 25
+  # 最小輪郭面積（px）
+  min_area: 500
+  # 検知後の録画延長秒数
+  post_seconds: 5
+
+recording:
+  # プリイベントバッファ秒数
+  pre_seconds: 3
+  # 最大録画秒数
+  max_seconds: 300
+  output_dir: data/recordings
+  snapshot_dir: data/snapshots
+
+storage:
+  # 保持日数
+  retention_days: 7
+  # 最大使用量(GB)
+  max_gb: 28
+  # クリーンアップ間隔(秒)
+  cleanup_interval: 3600
+
+web:
+  host: "0.0.0.0"
+  port: 8080
+  # Basic認証 (bcryptハッシュ)
+  username: admin
+  # デフォルトパスワード: microcam (bcryptハッシュ)
+  password_hash: "$2b$12$En9JFfG1Di4xA5MOkTgEme91Is44kQLxrMfDvPc40vHjuOjlHsYgq"
+
+line:
+  enabled: false
+  channel_access_token: ""
+  user_id: ""
+  # 通知クールダウン(秒)
+  cooldown: 60
+
+logging:
+  level: INFO

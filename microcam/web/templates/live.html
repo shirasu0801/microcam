@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}ライブ - MicroCam{% endblock %}
+
+{% block content %}
+<div class="live-container">
+    <div class="video-wrapper">
+        <img id="live-stream" src="/video_feed" alt="ライブ映像">
+    </div>
+    <div class="controls">
+        <div class="status-bar">
+            <span id="fps-display">-- fps</span>
+            <span id="detection-status">検知: --</span>
+            <span id="recording-status"></span>
+        </div>
+        <button id="toggle-detection" class="btn">検知 ON/OFF</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

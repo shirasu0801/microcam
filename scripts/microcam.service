@@ -1,0 +1,17 @@
+[Unit]
+Description=MicroCam Surveillance System
+After=network.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/microcam
+ExecStart=/home/pi/microcam/.venv/bin/python -m microcam
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

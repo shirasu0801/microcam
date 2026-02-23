@@ -1,0 +1,51 @@
+data/recordings/
+data/snapshots/
+data/mask.png
+*.pem
+*.key
+
+# Python
+*.py[cod]
+*.egg-info/
+*.egg
+*.pyc
+__pycache__/
+*.egg-info/
+dist/
+build/
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# pytest
+.pytest_cache/
+
+# Environment variables
+.env
+.env.*
+
+# Logs
+*.log
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+terraform.tfvars
+terraform.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+crash.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+.DS_Store

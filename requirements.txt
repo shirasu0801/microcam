@@ -1,0 +1,7 @@
+opencv-python-headless>=4.9.0
+flask>=3.0.0
+PyYAML>=6.0
+bcrypt>=4.1.0
+numpy>=1.26.0
+line-bot-sdk>=3.10.0
+requests>=2.31.0

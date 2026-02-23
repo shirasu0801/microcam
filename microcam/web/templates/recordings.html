@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}録画 - MicroCam{% endblock %}
+
+{% block content %}
+<div class="recordings-container">
+    <h2>録画一覧</h2>
+    <div id="recordings-list" class="recordings-list">
+        <p class="loading">読み込み中...</p>
+    </div>
+    <div id="player-container" class="player-container" style="display:none;">
+        <video id="video-player" controls></video>
+        <button id="close-player" class="btn btn-sm">閉じる</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    loadRecordings();
+});
+
+async function loadRecordings() {
+    const list = document.getElementById('recordings-list');
+    try {
+        const res = await fetch('/api/recordings');
+        const files = await res.json();
+        if (files.length === 0) {
+            list.innerHTML = '<p class="empty">録画ファイルはありません</p>';
+            return;
+        }
+        list.innerHTML = files.map(f => {
+            const date = new Date(f.mtime * 1000).toLocaleString('ja-JP');
+            const sizeMB = (f.size / 1048576).toFixed(1);
+            return `<div class="recording-item">
+                <div class="recording-info">
+                    <span class="recording-name">${f.name}</span>
+                    <span class="recording-meta">${date} / ${sizeMB} MB</span>
+                </div>
+                <div class="recording-actions">
+                    <button class="btn btn-sm" onclick="playRecording('${f.name}')">再生</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteRecording('${f.name}')">削除</button>
+                </div>
+            </div>`;
+        }).join('');
+    } catch (e) {
+        list.innerHTML = '<p class="error">読み込みに失敗しました</p>';
+    }
+}
+
+function playRecording(name) {
+    const player = document.getElementById('video-player');
+    const container = document.getElementById('player-container');
+    player.src = `/api/recordings/${name}`;
+    container.style.display = 'block';
+    player.play();
+}
+
+document.getElementById('close-player')?.addEventListener('click', () => {
+    const player = document.getElementById('video-player');
+    player.pause();
+    player.src = '';
+    document.getElementById('player-container').style.display = 'none';
+});
+
+async function deleteRecording(name) {
+    if (!confirm(`${name} を削除しますか？`)) return;
+    await fetch(`/api/recordings/${name}`, { method: 'DELETE' });
+    loadRecordings();
+}
+</script>
+{% endblock %}

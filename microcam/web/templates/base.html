@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}MicroCam{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block head %}{% endblock %}
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-brand">MicroCam</div>
+        <div class="navbar-menu">
+            <a href="/live" class="nav-link {% if request.path == '/live' or request.path == '/' %}active{% endif %}">ライブ</a>
+            <a href="/recordings" class="nav-link {% if request.path == '/recordings' %}active{% endif %}">録画</a>
+            <a href="/settings" class="nav-link {% if request.path == '/settings' %}active{% endif %}">設定</a>
+        </div>
+    </nav>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+    {% block scripts %}{% endblock %}
+</body>
+</html>

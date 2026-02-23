@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% block title %}設定 - MicroCam{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <h2>設定</h2>
+
+    <section class="settings-section">
+        <h3>検知設定</h3>
+        <div class="form-group">
+            <label>検知有効</label>
+            <input type="checkbox" id="detection-enabled">
+        </div>
+        <div class="form-group">
+            <label>背景学習率 (alpha)</label>
+            <input type="number" id="detection-alpha" step="0.001" min="0.001" max="0.1">
+        </div>
+        <div class="form-group">
+            <label>二値化閾値</label>
+            <input type="number" id="detection-threshold" min="1" max="255">
+        </div>
+        <div class="form-group">
+            <label>最小輪郭面積 (px)</label>
+            <input type="number" id="detection-min_area" min="100" max="10000">
+        </div>
+        <div class="form-group">
+            <label>検知後録画延長 (秒)</label>
+            <input type="number" id="detection-post_seconds" min="1" max="60">
+        </div>
+    </section>
+
+    <section class="settings-section">
+        <h3>録画設定</h3>
+        <div class="form-group">
+            <label>プリイベントバッファ (秒)</label>
+            <input type="number" id="recording-pre_seconds" min="0" max="30">
+        </div>
+        <div class="form-group">
+            <label>最大録画時間 (秒)</label>
+            <input type="number" id="recording-max_seconds" min="10" max="3600">
+        </div>
+    </section>
+
+    <section class="settings-section">
+        <h3>ストレージ設定</h3>
+        <div class="form-group">
+            <label>保持日数</label>
+            <input type="number" id="storage-retention_days" min="1" max="90">
+        </div>
+        <div class="form-group">
+            <label>最大使用量 (GB)</label>
+            <input type="number" id="storage-max_gb" step="0.5" min="1" max="100">
+        </div>
+        <div id="storage-info" class="info-box"></div>
+    </section>
+
+    <section class="settings-section">
+        <h3>LINE通知</h3>
+        <div class="form-group">
+            <label>LINE通知有効</label>
+            <input type="checkbox" id="line-enabled">
+        </div>
+        <div class="form-group">
+            <label>チャネルアクセストークン</label>
+            <input type="text" id="line-channel_access_token" class="input-wide">
+        </div>
+        <div class="form-group">
+            <label>ユーザーID</label>
+            <input type="text" id="line-user_id" class="input-wide">
+        </div>
+        <div class="form-group">
+            <label>通知クールダウン (秒)</label>
+            <input type="number" id="line-cooldown" min="10" max="600">
+        </div>
+        <button id="test-line" class="btn">テスト通知</button>
+    </section>
+
+    <section class="settings-section">
+        <h3>認証</h3>
+        <div class="form-group">
+            <label>新しいパスワード</label>
+            <input type="password" id="new-password">
+        </div>
+    </section>
+
+    <section class="settings-section">
+        <h3>検知除外マスク</h3>
+        <p>黒い領域は検知対象外になります。ブラシで塗りつぶしてください。</p>
+        <div class="mask-controls">
+            <button id="mask-clear" class="btn btn-sm">クリア</button>
+            <button id="mask-save" class="btn btn-sm">保存</button>
+            <label>ブラシサイズ: <input type="range" id="brush-size" min="5" max="100" value="30"></label>
+        </div>
+        <canvas id="mask-canvas" width="640" height="360"></canvas>
+    </section>
+
+    <div class="settings-actions">
+        <button id="save-settings" class="btn btn-primary">設定を保存</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+<script src="{{ url_for('static', filename='js/mask_editor.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    // 設定読み込み
+    const res = await fetch('/api/config');
+    const cfg = await res.json();
+
+    // フォームに値をセット
+    const fields = [
+        'detection-enabled', 'detection-alpha', 'detection-threshold',
+        'detection-min_area', 'detection-post_seconds',
+        'recording-pre_seconds', 'recording-max_seconds',
+        'storage-retention_days', 'storage-max_gb',
+        'line-enabled', 'line-channel_access_token', 'line-user_id', 'line-cooldown'
+    ];
+    fields.forEach(id => {
+        const el = document.getElementById(id);
+        const [section, key] = id.split('-');
+        if (el && cfg[section] && cfg[section][key] !== undefined) {
+            if (el.type === 'checkbox') el.checked = cfg[section][key];
+            else el.value = cfg[section][key];
+        }
+    });
+
+    // ストレージ使用量
+    try {
+        const sRes = await fetch('/api/storage/usage');
+        const usage = await sRes.json();
+        const mb = (usage.total_bytes / 1048576).toFixed(1);
+        document.getElementById('storage-info').textContent =
+            `使用量: ${mb} MB / ${usage.file_count} ファイル`;
+    } catch {}
+
+    // 設定保存
+    document.getElementById('save-settings').addEventListener('click', async () => {
+        const data = {
+            detection: {
+                enabled: document.getElementById('detection-enabled').checked,
+                alpha: parseFloat(document.getElementById('detection-alpha').value),
+                threshold: parseInt(document.getElementById('detection-threshold').value),
+                min_area: parseInt(document.getElementById('detection-min_area').value),
+                post_seconds: parseInt(document.getElementById('detection-post_seconds').value),
+            },
+            recording: {
+                pre_seconds: parseInt(document.getElementById('recording-pre_seconds').value),
+                max_seconds: parseInt(document.getElementById('recording-max_seconds').value),
+            },
+            storage: {
+                retention_days: parseInt(document.getElementById('storage-retention_days').value),
+                max_gb: parseFloat(document.getElementById('storage-max_gb').value),
+            },
+            line: {
+                enabled: document.getElementById('line-enabled').checked,
+                channel_access_token: document.getElementById('line-channel_access_token').value,
+                user_id: document.getElementById('line-user_id').value,
+                cooldown: parseInt(document.getElementById('line-cooldown').value),
+            },
+        };
+        const pw = document.getElementById('new-password').value;
+        if (pw) data.web = { password: pw };
+
+        await fetch('/api/config', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        });
+        alert('設定を保存しました');
+    });
+
+    // LINE テスト
+    document.getElementById('test-line').addEventListener('click', async () => {
+        const res = await fetch('/api/line/test', { method: 'POST' });
+        const r = await res.json();
+        alert(r.ok ? 'テスト通知を送信しました' : (r.error || 'エラー'));
+    });
+
+    // マスクエディタ初期化
+    initMaskEditor('mask-canvas', 'brush-size', 'mask-clear', 'mask-save');
+});
+</script>
+{% endblock %}
