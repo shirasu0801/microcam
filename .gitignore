@@ -49,3 +49,6 @@ crash.log
 # OS
 Thumbs.db
 .DS_Store
+
+# 実値を入れた設定ファイルはコミットしない
+config/config.yaml

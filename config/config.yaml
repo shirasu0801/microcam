@@ -36,8 +36,9 @@ web:
   port: 8080
   # Basic認証 (bcryptハッシュ)
   username: admin
-  # デフォルトパスワード: microcam (bcryptハッシュ)
-  password_hash: "$2b$12$En9JFfG1Di4xA5MOkTgEme91Is44kQLxrMfDvPc40vHjuOjlHsYgq"
+  # 注意: 過去のデフォルトパスワードとハッシュはGit履歴に残っているため使用禁止。
+  # 必ず新しいパスワードのハッシュを設定すること（生成方法は config.example.yaml 参照）。
+  password_hash: ""
 
 line:
   enabled: false

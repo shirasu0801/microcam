@@ -1,0 +1,45 @@
+# microcam 設定サンプル
+# 使い方: このファイルを config/config.yaml にコピーし、実値を設定する。
+# 実値を設定した config.yaml は絶対にコミットしないこと。
+
+camera:
+  device: 0
+  width: 1280
+  height: 720
+  fps: 15
+
+detection:
+  enabled: true
+  alpha: 0.01
+  threshold: 25
+  min_area: 500
+  post_seconds: 5
+
+recording:
+  pre_seconds: 3
+  max_seconds: 300
+  output_dir: data/recordings
+  snapshot_dir: data/snapshots
+
+storage:
+  retention_days: 7
+  max_gb: 28
+  cleanup_interval: 3600
+
+web:
+  host: "0.0.0.0"
+  port: 8080
+  # Basic認証 (bcryptハッシュ)
+  username: admin
+  # パスワードハッシュの生成方法:
+  #   python3 -c "import bcrypt; print(bcrypt.hashpw(b'YOUR_PASSWORD', bcrypt.gensalt()).decode())"
+  password_hash: ""
+
+line:
+  enabled: false
+  channel_access_token: ""
+  user_id: ""
+  cooldown: 60
+
+logging:
+  level: INFO
